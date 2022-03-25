@@ -1,4 +1,3 @@
-from turtle import distance
 import pygame
 import pymunk
 import pymunk.pygame_util
@@ -76,7 +75,7 @@ def run(window, width, height):
                 run = False
                 break
             if event.type == pygame.MOUSEBUTTONDOWN:
-                ball.body.apply_impulse_at_local_point((50000,0), (0,0))
+                ball.body.apply_impulse_at_local_point((10000,0), (0,0))
 
 
         draw(space, window, draw_options)
