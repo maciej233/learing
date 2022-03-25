@@ -1,6 +1,4 @@
-from cmath import rect
-import re
-from xml.dom.pulldom import PullDOM
+from turtle import distance
 import pygame
 import pymunk
 import pymunk.pygame_util
@@ -15,6 +13,14 @@ WHITE = (255, 255, 255)
 
 
 window = pygame.display.set_mode((WIDTH, HEIGHT))
+
+def calulate_distance(p1, p2):
+    distance = math.sqrt((p2[1] - p1[1])**2 + (p2[0] - p1[1])**2)
+    return distance
+
+def calculate_angle(p1, p2):
+    angle = math.atan2(p2[1] - p1[1], p2[0] - p1[0])
+    return angle
 
 def create_boundaries(space, width, height):
     rects = [
