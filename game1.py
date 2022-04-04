@@ -37,7 +37,7 @@ def create_boundaries(space, width, height):
         space.add(body, shape)
 
 def create_ball(space, radius, mass, pos):
-    body = pymunk.Body()
+    body = pymunk.Body(body_type=pymunk.Body.STATIC)
     body.position = pos
     ball = pymunk.Circle(body, radius)
     ball.mass = mass
@@ -47,8 +47,10 @@ def create_ball(space, radius, mass, pos):
     space.add(body, ball)
     return ball
 
-def draw(space, window, draw_options):
+def draw(space, window, draw_options, line):
     window.fill(WHITE)
+    if line:
+        pygame.draw.line(window, "black", line[0], line[1], 3)
     space.debug_draw(draw_options)
     pygame.display.update()
 
@@ -71,6 +73,9 @@ def run(window, width, height):
     create_boundaries(space, width, height)
 
     while run:
+        line = None
+        if ball and pressed_pos:
+            line = [pressed_pos, pygame.mouse.get_pos()]
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
@@ -79,19 +84,20 @@ def run(window, width, height):
                 if not ball:
                     pressed_pos = pygame.mouse.get_pos()
                     ball = create_ball(space, 30, 10, pressed_pos)
-
-                #ball.body.apply_impulse_at_local_point((10000,0), (0,0))
-
-
-        draw(space, window, draw_options)
+                elif pressed_pos:
+                    ball.body.body_type = pymunk.Body.DYNAMIC
+                    ball.body.apply_impulse_at_local_point((10000,0), (0,0))
+                    pressed_pos = None
+                else:
+                    space.remove(ball, ball.body)
+                    ball = None
+  
+        draw(space, window, draw_options, line)
         
 
         space.step(dt)
         clock.tick(fps)
-
-        
-
-
+ 
     pygame.quit()
 
 if __name__ == "__main__":
