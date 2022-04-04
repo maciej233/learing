@@ -36,10 +36,9 @@ def create_boundaries(space, width, height):
         shape.friction = 0.5
         space.add(body, shape)
 
-def create_ball(space, radius, mass):
+def create_ball(space, radius, mass, pos):
     body = pymunk.Body()
-    body.position = (WIDTH / 2, 100)
-
+    body.position = pos
     ball = pymunk.Circle(body, radius)
     ball.mass = mass
     ball.color = (255, 255, 0, 100)
@@ -66,7 +65,9 @@ def run(window, width, height):
     draw_options = pymunk.pygame_util.DrawOptions(window)
 
     # create objects
-    ball = create_ball(space, 30, 10)
+    #ball = create_ball(space, 30, 10)
+    ball = None
+    pressed_pos = None
     create_boundaries(space, width, height)
 
     while run:
@@ -75,7 +76,11 @@ def run(window, width, height):
                 run = False
                 break
             if event.type == pygame.MOUSEBUTTONDOWN:
-                ball.body.apply_impulse_at_local_point((10000,0), (0,0))
+                if not ball:
+                    pressed_pos = pygame.mouse.get_pos()
+                    ball = create_ball(space, 30, 10, pressed_pos)
+
+                #ball.body.apply_impulse_at_local_point((10000,0), (0,0))
 
 
         draw(space, window, draw_options)
