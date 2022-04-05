@@ -14,7 +14,7 @@ WHITE = (255, 255, 255)
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 
 def calulate_distance(p1, p2):
-    distance = math.sqrt((p2[1] - p1[1])**2 + (p2[0] - p1[1])**2)
+    distance = math.sqrt((p2[1] - p1[1])**2 + (p2[0] - p1[0])**2)
     return distance
 
 def calculate_angle(p1, p2):
@@ -35,6 +35,41 @@ def create_boundaries(space, width, height):
         shape.elasticity = 0.4
         shape.friction = 0.5
         space.add(body, shape)
+
+def create_swinging_ball(space):    
+    rotation_center_body = pymunk.Body(body_type=pymunk.Body.STATIC)
+    rotation_center_body.position = (400, 300)
+
+    body = pymunk.Body()
+    body.position = (400, 300)
+    line = pymunk.Segment(body, (0,0), (255,0), 5)
+    circle = pymunk.Circle(body, 40, (255, 0))
+    line.friction = 1
+    circle.friction = 1
+    line.mass = 8 
+    circle.mass = 30
+    circle.elasticity = 0.95
+    rotation_center_joint = pymunk.PinJoint(body, rotation_center_body, (0,0), (0,0))
+    space.add(circle, line, body, rotation_center_joint)
+    
+
+def create_obstacles(space, width, height):
+    BROWN = (139, 69, 19, 100)
+    rects = [
+        [(600, height - 120), (40, 200), BROWN, 100],
+        [(900, height - 120), (40, 200), BROWN, 100],
+        [(750, height - 240), (340, 40), BROWN, 150],
+    ]
+    for pos, size, color, mass in rects:
+        body = pymunk.Body()
+        body.position = pos
+        shape = pymunk.Poly.create_box(body, size, radius=1)
+        shape.color = color
+        shape.mass = mass
+        shape.elasticity = 0.4
+        shape.friction = 0.4
+        space.add(body, shape)
+
 
 def create_ball(space, radius, mass, pos):
     body = pymunk.Body(body_type=pymunk.Body.STATIC)
@@ -71,6 +106,8 @@ def run(window, width, height):
     ball = None
     pressed_pos = None
     create_boundaries(space, width, height)
+    create_obstacles(space, width, height)
+    create_swinging_ball(space)
 
     while run:
         line = None
@@ -86,7 +123,13 @@ def run(window, width, height):
                     ball = create_ball(space, 30, 10, pressed_pos)
                 elif pressed_pos:
                     ball.body.body_type = pymunk.Body.DYNAMIC
-                    ball.body.apply_impulse_at_local_point((10000,0), (0,0))
+                    angle = calculate_angle(*line)
+                    force = calulate_distance(*line) * 25
+                    fx = math.cos(angle) * force
+                    fy = math.sin(angle) * force
+
+                    
+                    ball.body.apply_impulse_at_local_point((fx,fy), (0,0))
                     pressed_pos = None
                 else:
                     space.remove(ball, ball.body)
