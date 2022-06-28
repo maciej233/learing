@@ -1,6 +1,6 @@
 """Load file"""
 import sys
-import os
+
 
 def load(file):
     try:
