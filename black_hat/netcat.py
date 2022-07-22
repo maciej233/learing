@@ -7,6 +7,7 @@ import subprocess
 import shlex
 import socket
 
+
 class NetCat:
     def __init__(self, args, buffer=None):
         self.args = args
@@ -49,20 +50,11 @@ class NetCat:
         self.socket.bind((self.args.target, self.args.port))  # tworzy socket nasłuchujący dla servera
         self.socket.listen(5) # przyjmuje do pięciu połączeń w tym samym czasie
         while True:
-            client_socket, _ = self.socket.accept() # po akceptacji zapytania nas erver zwraca nam clienta, adres[0]=IP, adres[1]=PORT
+            client_socket, _ = self.socket.accept() # po akceptacji zapytania nas server zwraca nam clienta, adres[0]=IP, adres[1]=PORT
             client_thread = threading.Thread(target=self.handler, args=(client_socket,)) # tworzy obsługę kilku zapytań na server, na tym samym CPU
             client_thread.start() # uruchamiamy funckę handler
     # tworzy osbługę zapytań na server, a dokładnie 3 moetod --command, --execute, --upload okreśłonych w main()
     def handler(self, client_socket):
-
-        # funkcja pomoncnicza do obłusgi commendy --execute
-        def execute(command):
-            command.strip()
-            if not command:
-                return
-            else:
-                output = subprocess.check_output(shlex.split(command), stderr=subprocess.STDOUT)        
-            return output.decode()
 
         if self.args.execute: # jeśli zapytanie było -e lub --execute
             output = execute(self.args.execute) # przysyła zapytanie na server np "ls -la"
@@ -73,8 +65,8 @@ class NetCat:
             while True:
                 try:
                     client_socket.send(b'BHP:# ') # powinien nam się uruchomić na cliencie nowy prompt do wpisywania commmend
-                    while '\n' not in cmd_buffer.decode(): # jeśli nie pojawi się enter
-                        cmd_buffer +=client_socket.recv(64) # służy to do załadowania nowego promptu
+                    while '\n' not in cmd_buffer.decode(): # zbiera całą komendę zanim naciśniemy enter
+                        cmd_buffer +=client_socket.recv(64)
                     response = execute(cmd_buffer.decode()) # wykonaj komendę znalezioną w buforze i zwróć zapytanie z servera
                     if response: # jesli jakaś comenda się wykona
                         client_socket.send(response.encode()) # PKOAŻ u clienta odpowiedz w postaci stringa
@@ -105,12 +97,11 @@ def main():
         netcat.py -t 192.168.0.1 -p 5555 -l -c              # command shell
         netcat.py -t 192.168.0.1 -p 5555 -l -u=myfile.txt   # upload file
         netcat.py -t 192.168.0.1 -p 5555 -l -e              # execute one command
-        netcat.py -t 192.168.0.1 -p 5555 -u file.txt        # upload to file ./file.txt
         netcat.py -t 192.168.0.1 -p 5555                    # connect to server
         """))
 
-    parser.add_argument("-e", "--execute",  action="store_true",    help="execute command")
-    parser.add_argument('-l', '--listen',                           help="listen on port")
+    parser.add_argument("-e", "--execute",                          help="execute command")
+    parser.add_argument('-l', '--listen',   action="store_true",    help="listen on port")
     parser.add_argument('-c', '--command',  action="store_true",    help="command shell")
     parser.add_argument('-t', '--target',   default="127.0.0.1",    help="target IP")
     parser.add_argument('-p', '--port',     default=5555, type=int, help="target port")
@@ -125,6 +116,16 @@ def main():
     nc = NetCat(args, buffer.encode())
     nc.run()
 
+
+# funkcja pomoncnicza do obłusgi commendy --execute
+def execute(cmd):
+    cmd=str(cmd)
+    cmd.strip()
+    if not cmd:
+        return
+    else:
+        output = subprocess.check_output(shlex.split(cmd), stderr=subprocess.STDOUT)
+    return output.decode()
 
 if __name__ == "__main__":
     main()
