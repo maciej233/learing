@@ -1,1 +1,0 @@
-Testing sending meesage to server
