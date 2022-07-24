@@ -1,0 +1,10 @@
+Digraph Network {
+    size = "4,4";
+    core [shape=box]; /* shaape of core box */
+    core -> distribution [weight=10. label="1Gb/s"];
+    distribution [shape="triangle", color="blue"]
+    distribution -> access1 [style=dotted, label="1Gb/s"];
+    edge [color=red];
+    access2 [color=red, style=filled, fontsize=20]
+    distribution -> access2 [style=dotted, label="100Mb/s"];
+}

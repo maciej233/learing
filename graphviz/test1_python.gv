@@ -1,0 +1,9 @@
+digraph {
+	core [color=blue]
+	distribution
+	access1
+	access2 [color=red, style=filled]
+	core -> distribution [label="1Gb"]
+	distribution -> access1 [label="1Gb"]
+	distribution -> access2 [label="100Mb" color=red]
+}
