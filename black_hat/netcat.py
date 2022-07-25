@@ -1,4 +1,7 @@
-"""Program will mimics the netcat 'nc' framework"""
+"""Program will mimics the netcat 'nc' framework
+   The program derived from book black hat python
+   By Justin Seitz and Tim Arnold
+"""
 import argparse
 import threading
 import sys
@@ -53,7 +56,7 @@ class NetCat:
             client_socket, _ = self.socket.accept() # po akceptacji zapytania nas server zwraca nam clienta, adres[0]=IP, adres[1]=PORT
             client_thread = threading.Thread(target=self.handler, args=(client_socket,)) # tworzy obsługę kilku zapytań na server, na tym samym CPU
             client_thread.start() # uruchamiamy funckę handler
-    # tworzy osbługę zapytań na server, a dokładnie 3 moetod --command, --execute, --upload okreśłonych w main()
+    # tworzy osbługę zapytań na server, a dokładnie 3 metod --command, --execute, --upload okreśłonych w main()
     def handler(self, client_socket):
 
         if self.args.execute: # jeśli zapytanie było -e lub --execute
