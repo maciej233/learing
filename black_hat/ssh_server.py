@@ -1,28 +1,21 @@
-<<<<<<< HEAD
-"""Server side"""
-
-
-=======
-import os
->>>>>>> 64d5800a2d285463c79efbc80dd91ece1abb70a5
-import paramiko
+# encoding: utf-8
+"""
+@file: ssh_server.py
+@time: 2022/8/05 112:00
+@project: black-hat-python-2ed
+"""
+import os.path
 import socket
 import sys
 import threading
-<<<<<<< HEAD
-import socket
-import os
+
+import paramiko
 
 CWD = os.path.dirname(os.path.realpath(__file__))
-RSA_KEY = paramiko.RSAKey(filename=os.path.join(CWD, "id_rsa_test"))
-=======
->>>>>>> 64d5800a2d285463c79efbc80dd91ece1abb70a5
-
-CWD = os.path.dirname(os.path.realpath(__file__))
-HOSTKEY = paramiko.RSAKey(filename=os.path.join(CWD, '.test_rsa.key'))
+HOSTKEY = paramiko.RSAKey(filename=os.path.join(CWD, 'id_rsa_test'))
 
 
-class Server (paramiko.ServerInterface):
+class Server(paramiko.ServerInterface):
     def _init_(self):
         self.event = threading.Event()
 
@@ -32,64 +25,14 @@ class Server (paramiko.ServerInterface):
         return paramiko.OPEN_FAILED_ADMINISTRATIVELY_PROHIBITED
 
     def check_auth_password(self, username, password):
-<<<<<<< HEAD
-        if (username == 'maciej') and (password == 'password'):
-            return paramiko.AUTH_SUCCESSFUL
-
-def main():
-    SERVER_IP = '172.26.30.2'
-    SERVER_PORT = 2222
-    try:
-        connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        connection.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        connection.bind((SERVER_IP, SERVER_PORT))
-        connection.listen(100)
-        print("******CONNECTING TO SERVER*******")
-        client, address = connection.accept()
-        print(f"\n\nYou have connected to server {address[0]}:{address[1]}", client)
-    except Exception as e:
-        print(f"Exception occured {e}")
-        sys.exit(1)
-    
-    bhsession = paramiko.Transport(client)
-    bhsession.add_server_key(RSA_KEY)
-    server = Server()
-    bhsession.start_server(server=server)
-
-    chan = bhsession.accept(20)
-    if chan is None:
-        print("*** NO CHANNEL! ***")
-        sys.exit(1)
-
-    print("[+] AUTHENTICATED!")
-    print(chan.recv(1024))
-    chan.send("WELCOME TO BHSESSION")
-
-    try:
-        while True:
-            command = input("Enter command: ")
-            if command != "exit":
-                chan.send(command)
-                response = chan.recv(8192)
-                print(response.decode())
-            else:
-                chan.send("exit")
-                print("exiting")
-                bhsession.close()
-                break
-    except KeyboardInterrupt:
-        bhsession.close()    
-    
-if __name__ == "__main__":
-    main()
-=======
-        if (username == 'tim') and (password == 'sekret'):
+        if username == 'admin' and password == 'admin':
             return paramiko.AUTH_SUCCESSFUL
 
 
 if __name__ == '__main__':
-    server = '192.168.1.207'
+    server = '172.26.30.2'
     ssh_port = 2222
+
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -101,7 +44,7 @@ if __name__ == '__main__':
         print('[-] Listen failed: ' + str(e))
         sys.exit(1)
     else:
-        print(f'[+] Got a connection! from {addr}')
+        print('[+] Got a connection!', client, addr)
 
     bhSession = paramiko.Transport(client)
     bhSession.add_server_key(HOSTKEY)
@@ -110,11 +53,11 @@ if __name__ == '__main__':
 
     chan = bhSession.accept(20)
     if chan is None:
-        print('*** No channel.')
+        print("*** No channel.")
         sys.exit(1)
 
     print('[+] Authenticated!')
-    print(chan.recv(1024).decode())
+    print(chan.recv(1024))
     chan.send('Welcome to bh_ssh')
     try:
         while True:
@@ -130,4 +73,3 @@ if __name__ == '__main__':
                 break
     except KeyboardInterrupt:
         bhSession.close()
->>>>>>> 64d5800a2d285463c79efbc80dd91ece1abb70a5
