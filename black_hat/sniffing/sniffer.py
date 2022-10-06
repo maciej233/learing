@@ -9,7 +9,9 @@ import sys
 """Create the structure of IP packet
 c_ubyte unsigned char
 c_ushort unsigned  short
-c_ubyte unsigned intetger
+c_ubint unsigned intetger
+< little endian
+L unsigned long integer
 """
 
 OS_NAME = "nt"  # nt for windows
@@ -27,7 +29,7 @@ class IP(Structure):
         ("protocol_num", c_ubyte, 8),
         ("checksum", c_ushort, 16),
         ("src", c_uint, 32),
-        ("dst", c_ubyte, 32)
+        ("dst", c_uint, 32)
     ]
     def __new__(cls, socket_buffer=None):
         return cls.from_buffer_copy(socket_buffer)
@@ -43,8 +45,20 @@ class IP(Structure):
             print("%s \nNO protocl for %s") % (e, self.protocl_num)
             self.protocol = str(self.protocol_num)
 
+
+"""
+< little endian
+B unsigned char integer
+H unsigend_short integer
+"""
 class ICMP(Structure):
-    pass
+    def __init__(self, buffer=None):
+        header = struct.unpack("<BBHHH", buffer)
+        self.type = header[0]
+        self.code = header[1]
+        self.sum = header[2]
+        self.id = header[3]
+        self.seq = header[4]
 
 
 def sniff(host):
@@ -53,7 +67,7 @@ def sniff(host):
     else:
         socket_protocol = socket.IPPROTO_ICMP
     sniffer = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket_protocol) # raw socket
-    sniffer.bind((host, 0))
+    sniffer.bind((host, 0))  # all port bind with IP
     sniffer.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)  # include IP headers
 
     if os.name == OS_NAME:
@@ -63,16 +77,26 @@ def sniff(host):
         while True:
             raw_buffer = sniffer.recvfrom(65535)[0] # catch first packet
             ip_header = IP(raw_buffer)[0:20] # create IP header object
-            print("Protocol: %s %s -> %s" % (ip_header.protocol, ip_header.src_address, ip_header.dst_address)) # pull out protocol src and dest from packet
-    
+            if ip_header.protocl == "ICMP":
+                print("Protocol: %s %s -> %s" % (ip_header.protocol, ip_header.src_address, ip_header.dst_address)) # pull out protocol src and dest from packet
+                print(f"Version: {ip_header.ver}")
+                print(f"Header length: {ip_header.length} TTL: {ip_header.ttl}")
+
+                #calculate if our packet starts
+                offset = ip_header.hdr*4
+                buffer = raw_buffer[offset:offset+8]
+                # create ICMP structure
+                icmp_header = ICMP(buffer)
+                print(f"ICMP -> Type: {icmp_header.type}\nCode: {icmp_header.code}")
+                    
     except KeyboardInterrupt:
         if os.name == OS_NAME:
-            sniffer.ioctl(socket.SIO_RCVALL, socket.RCVALL_OFF) # trun of prmiscous mode
+            sniffer.ioctl(socket.SIO_RCVALL, socket.RCVALL_OFF) # trun off prmiscous mode
         sys.exit()
 
 if __name__ == "__main__":
     if len(sys.argv) == 2:
         host = sys.argv[1]
     else:
-        host = "192.168.1.173"
+        host = "192.168.30.2"
     sniff(host)
