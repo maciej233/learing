@@ -18,7 +18,7 @@ OS_NAME = "nt"  # nt for windows
 
 
 class IP(Structure):
-    __fields__ = [
+    _fields_ = [
         ("ver", c_ubyte, 4),
         ("hdr", c_ubyte, 4),
         ("tos", c_ubyte, 8),
@@ -76,7 +76,7 @@ def sniff(host):
     try:
         while True:
             raw_buffer = sniffer.recvfrom(65535)[0] # catch first packet
-            ip_header = IP(raw_buffer)[0:20] # create IP header object
+            ip_header = IP(raw_buffer[0:20]) # create IP header object
             if ip_header.protocl == "ICMP":
                 print("Protocol: %s %s -> %s" % (ip_header.protocol, ip_header.src_address, ip_header.dst_address)) # pull out protocol src and dest from packet
                 print(f"Version: {ip_header.ver}")
