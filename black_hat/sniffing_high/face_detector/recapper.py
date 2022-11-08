@@ -1,6 +1,4 @@
 from collections import namedtuple
-from fileinput import filelineno
-from urllib import response
 from scapy.all import rdpcap, TCP
 import sys
 import re
@@ -13,8 +11,8 @@ then it detects faces from images and save them either
 """
 
 
-OUTDIR = '/home/maciej/learing/black_hat/sniffing_high/outputs'
-PCAPS = '/home/maciej/learing/black_hat/sniffing_high/pcaps'
+OUTDIR = '/home/maciej/learing/black_hat/sniffing_high/face_detector/pictures'
+PCAPS = '/home/maciej/learing/black_hat/sniffing_high/face_detector/pcaps'
 Response = namedtuple("Respone", ['header', 'payload'])
 
 """ get header with Content-Type"""
