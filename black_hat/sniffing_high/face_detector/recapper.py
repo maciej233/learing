@@ -18,7 +18,7 @@ Response = namedtuple("Respone", ['header', 'payload'])
 """ get header with Content-Type"""
 def get_header(payload):
     try:
-        raw_header = payload[:payload.index((b'\r\n\r\n')+2)]
+        raw_header = payload[:payload.index(b'\r\n\r\n')+2]
     except ValueError:
         sys.stdout.write('-')
         sys.stdout.flush()
@@ -55,8 +55,8 @@ class Reccaper:
             payload = b''
             for packet in self.session[session]:
                 try:
-                    if packet[TCP].dport == 80 or packet[TCP].sport == 80:
-                        payload += bytes(packet[TCP].paylad)
+                    if packet[TCP].dport == 443 or packet[TCP].sport == 443:
+                        payload += bytes(packet[TCP].payload)
                 except IndexError:
                     sys.stdout.write('X')
                     sys.stdout.flush()

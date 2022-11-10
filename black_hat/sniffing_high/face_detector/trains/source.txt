@@ -1,0 +1,1 @@
+wget http://eclect.cc/files/2008/03/haarcascade_frontalface_alt.xml
